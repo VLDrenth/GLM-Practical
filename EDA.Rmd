@@ -1,0 +1,63 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+df <- read.csv('data/mortg.csv')
+
+head(df)
+```
+```{r}
+# Plotting box plots of numerical variables against the binary approved
+# using facet wrap
+```
+
+```{r}
+ggplot(df, aes(x = factor(ifelse(approved, 'Yes', 'No')), y = hir)) +
+  geom_boxplot() +
+  labs(x = "Approved", y = "Hir") +
+  theme_minimal()
+
+ggplot(df, aes(x = factor(ifelse(approved, 'Yes', 'No')), y = odir)) +
+  geom_boxplot() +
+  labs(x = "Approved", y = "Odir") +
+  theme_minimal()
+
+ggplot(df, aes(x = factor(ifelse(approved, 'Yes', 'No')), y = lvr)) +
+  geom_boxplot() +
+  labs(x = "Approved", y = "Lvr") +
+  theme_minimal()
+
+ggplot(df, aes(x = factor(ifelse(approved, 'Yes', 'No')), y = uria)) +
+  geom_boxplot() +
+  labs(x = "Approved", y = "Uria") +
+  theme_minimal()
+```
+
+```{r}
+# Make table of Ratio of Approved to Not Approved for each level mcs
+
+mcs_ratios <- df %>%
+  group_by(mcs) %>%
+  summarise(approved = sum(approved) / length(approved))
+
+ggplot(mcs_ratios, aes(x = mcs, y = approved)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Mcs", y = "Ratio of Approved to Not Approved") +
+  theme_minimal()
+```
+
+```{r}
+other_ratios <- df %>%
+  group_by(self, single, white) %>%
+  summarise(approved = sum(approved) / length(approved))
+other_ratios
+```
+
+
+
+
