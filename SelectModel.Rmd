@@ -1,0 +1,49 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+Full model with interactions with self
+
+```{r}
+df <- read.csv("data/mortg.csv")
+full.glm <- glm(approved ~ . + self:(.), data = df, family = binomial)
+summary(full.glm)
+
+partial.glm <- glm(approved ~ ., data = df, family = binomial)
+summary(partial.glm)
+
+# Including only the three individually significant interactions
+subset.glm <- glm(approved ~ . + self:(odir + white + uria), data = df, family = binomial)
+summary(subset.glm)
+```
+
+LIKELIHOOD RATIO TEST (all interactions)
+```{r}
+D_full <- full.glm$deviance
+D_partial <- partial.glm$deviance
+D_subset <- subset.glm$deviance
+
+# Likelihood ratio test statistic
+lrt_all <- (D_partial - D_full)
+lrt_ins <- (D_subset - D_full)
+
+# Degrees of freedom
+dof_all <- (length(full.glm$coefficients) - length(partial.glm$coefficients))
+dof_ins <- (length(full.glm$coefficients) - length(subset.glm$coefficients))
+
+# p-value
+pval_all <- pchisq(lrt_all, df = dof_all, lower.tail = FALSE)
+pval_ins <- pchisq(lrt_ins, df = dof_ins, lower.tail = FALSE)
+
+# Print results
+cat("Likelihood ratio test statistic (All interactions):", lrt_all, "\n")
+cat("Degrees of freedom:", dof_all, "\n")
+cat("p-value:", pval_all, "\n")
+cat("\n")
+cat("Likelihood ratio test statistic (Insignificant interactions):", lrt_ins, "\n")
+cat("Degrees of freedom:", dof_ins, "\n")
+cat("p-value:", pval_ins, "\n")
+```
+
