@@ -46,4 +46,38 @@ cat("Likelihood ratio test statistic (Insignificant interactions):", lrt_ins, "\
 cat("Degrees of freedom:", dof_ins, "\n")
 cat("p-value:", pval_ins, "\n")
 ```
+MCS
+```{r}
+# Changing mcs to a factor
+df_factor <- df %>%
+  mutate(mcs = as.factor(mcs))
 
+# Including only the three individually significant interactions
+numeric.glm <- glm(approved ~ . + self:(odir + white + uria), data = df, family = binomial)
+factor.glm <- glm(approved ~ . + self:(odir + white + uria), data = df_factor, family = binomial)
+
+# aic
+aic_numeric <- numeric.glm$aic
+aic_factor <- factor.glm$aic
+
+# LRT
+D_numeric <- numeric.glm$deviance
+D_factor <- factor.glm$deviance
+
+# Likelihood ratio test statistic
+lrt <- (D_numeric - D_factor)
+
+# Degrees of freedom
+dof <- (length(factor.glm$coefficients) - length(numeric.glm$coefficients))
+
+# p-value
+pval <- pchisq(lrt, df = dof, lower.tail = FALSE)
+
+# Print results
+cat("AIC (numeric):", aic_numeric, "\n")
+cat("AIC (factor):", aic_factor, "\n")
+cat("\n")
+cat("Likelihood ratio test statistic:", lrt, "\n")
+cat("Degrees of freedom:", dof, "\n")
+cat("p-value:", pval, "\n")
+```
