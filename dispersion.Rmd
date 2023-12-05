@@ -1,0 +1,41 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+``` {r}
+library(ggplot2)
+library(dplyr)
+
+df <- read.csv('data/mortg.csv')
+df$mcs <- df$mcs - 1
+
+var <- c('hir', 'odir', 'lvr', 'uria')
+df[,which(colnames(df) %in% var)] <- df %>% select(all_of(var)) %>% scale()
+head(df, 5)
+```
+
+``` {r}
+model <- glm(approved ~ . + self:(odir + white + uria), data = df, family = binomial)
+```
+
+``` {r}
+# get the estimate of the dispersion parameter
+phi_hat <- sum(residuals(model, type = 'pearson')^2) / model$df.residual
+```
+
+``` {r}
+# Get the log-dds coefficients of model
+coefs <- summary(model)$coefficients
+
+# Multiply Standard Errors by sqrt(phi_hat)
+coefs[,2] <- coefs[,2] * sqrt(phi_hat)
+
+# adjust z-values
+coefs[,3] <- coefs[,1] / coefs[,2]
+
+# get p-values
+coefs[,4] <- 2 * pnorm(-abs(coefs[,3]))
+
+xtable(coefs, digits = 3)
+```

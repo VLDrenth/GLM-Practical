@@ -14,7 +14,6 @@ mean(df$approved)
 ```
 
 ``` {r}
-
 hirdec <- findInterval(df$hir, quantile(df$hir, seq(0, 0.9, 0.1)))
 
 barplot(tapply(df$approved, hirdec, mean), beside = TRUE,
@@ -49,30 +48,6 @@ tapply(df$approved, df$single, mean)
 tapply(df$approved, df$white, mean)
 ```
 
-
-
-```{r}
-ggplot(df, aes(x = factor(ifelse(approved, 'Yes', 'No')), y = hir)) +
-  geom_boxplot() +
-  labs(x = "Approved", y = "Hir") +
-  theme_minimal()
-
-ggplot(df, aes(x = factor(ifelse(approved, 'Yes', 'No')), y = odir)) +
-  geom_boxplot() +
-  labs(x = "Approved", y = "Odir") +
-  theme_minimal()
-
-ggplot(df, aes(x = factor(ifelse(approved, 'Yes', 'No')), y = lvr)) +
-  geom_boxplot() +
-  labs(x = "Approved", y = "Lvr") +
-  theme_minimal()
-
-ggplot(df, aes(x = factor(ifelse(approved, 'Yes', 'No')), y = uria)) +
-  geom_boxplot() +
-  labs(x = "Approved", y = "Uria") +
-  theme_minimal()
-```
-
 ```{r}
 # Make table of Ratio of Approved to Not Approved for each level mcs
 
@@ -85,7 +60,7 @@ ggplot(mcs_ratios, aes(x = mcs, y = approved)) +
   labs(x = "Mcs", y = "Ratio of Approved to Not Approved") +
   theme_minimal()
 ```
-
+Tables Binary Variables
 ```{r}
 other_ratios <- df %>%
   group_by(self, single, white) %>%
@@ -104,8 +79,8 @@ approval_single
 approval_self
 ```
 
-```{r}
-```
+
+Summary Statistics Tables
 
 ``` {r} 
 df_cont <- df %>% select(hir, odir, lvr)
@@ -149,7 +124,7 @@ ggplot(counts_uria, aes(x = as.factor(round(uria, 2)), y = n)) +
   labs(x = "Uria", y = "Proportion of observations") +
   theme_minimal()
 ```
-
+Categorical Approval Proportions
 ``` {r}
 
 # Plot barplots of approval rate for each level of mcs

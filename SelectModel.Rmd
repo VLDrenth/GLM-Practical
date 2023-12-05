@@ -3,14 +3,14 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-
 Full model with interactions with self
-
 ```{r}
 df <- read.csv("data/mortg.csv")
+# All variables all interactions
 full.glm <- glm(approved ~ . + self:(.), data = df, family = binomial)
 summary(full.glm)
 
+# All variables no interactions
 partial.glm <- glm(approved ~ ., data = df, family = binomial)
 summary(partial.glm)
 
@@ -46,7 +46,7 @@ cat("Likelihood ratio test statistic (Insignificant interactions):", lrt_ins, "\
 cat("Degrees of freedom:", dof_ins, "\n")
 cat("p-value:", pval_ins, "\n")
 ```
-MCS
+MCS Numeric or Factor
 ```{r}
 # Changing mcs to a factor
 df_factor <- df %>%
@@ -82,9 +82,8 @@ cat("Degrees of freedom:", dof, "\n")
 cat("p-value:", pval, "\n")
 ```
 
-
+Residual Plot -> Not Useful
 ```{r}
-
 model <- numeric.glm
 
 n1 <- length(model$residuals)/2

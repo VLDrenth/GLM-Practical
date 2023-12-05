@@ -45,3 +45,9 @@ results_alt <- data.frame(odds_ratio_estimate_alt, lower_ci_alt, upper_ci_alt)
 results_alt
 xtable(results_alt)
 ```
+
+``` {r}
+percentage_change <- (results_alt[-1,1] - 1)
+names(percentage_change) <- rownames(results_alt)[-1]
+round(100 * percentage_change, 1)
+```
