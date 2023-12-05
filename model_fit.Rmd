@@ -1,0 +1,91 @@
+```{r}
+
+model <- numeric.glm
+
+n1 <- length(model$residuals)/2
+n2 <- n1 + 1
+N <- length(model$residuals)
+
+# plot residuals
+plot(predict(model,type="response")[1:n1], residuals(model, type='deviance')[1:n1],
+xlab=expression(hat(mu)), ylab="Deviance Residuals",
+pch=19, col="blue", xlim=c(min(predict(model, type="response")[1:n1]),1), ylim=c(-2.5,2.5))
+
+points(predict(model,type="response")[n2:N], residuals(model, type = 'deviance')[n2:N],pch=19, col="red")
+
+```
+``` {r}
+res_deviance <- residuals(model, type = 'deviance')
+
+neg_res <- res_deviance[res_deviance < 0]
+pos_res <- res_deviance[res_deviance > 0]
+
+ggplot(data.frame(res_deviance), aes(x = res_deviance)) +
+  geom_histogram(binwidth = 0.1, fill = "blue", color = "black") +
+  labs(x = "Deviance Residuals", y = "Count") +
+  theme_bw()
+```
+Cook's Distance
+```{r}
+
+model <- numeric.glm
+
+# Cook's Distance
+cooksdf <- as.data.frame(cooks.distance(model))
+names(cooksdf) <- "cooksd"
+cooksdf$approved <- as.factor(df$approved)
+
+cutoff  <- round(8/(N - 2 * length(model$coefficients)), 4)
+
+plot1 <- ggplot(cooksdf, aes(x = seq(1:length(cooksd)), y = cooksd, colour = approved)) +
+  geom_point() +
+  labs(x = "Observation", y = "Cook's Distance") 
+
+plot1 + geom_hline(aes(yintercept=cutoff)) + 
+  scale_y_continuous(breaks=sort(c(ggplot_build(plot1)$layout$panel_ranges[[1]]$y.major_source, cutoff))) +
+  theme_bw()
+```
+``` {r}
+# Total exceeding cutoff
+cooksdf$approved[cooksdf$cooksd > cutoff] %>% table() 
+
+# Approved distribtion ratio
+df$approved %>% table() %>% prop.table()
+
+which.max(cooksdf$cooksd)
+```
+
+Code used for the appendix
+``` {r}
+outliers <- cooksdf %>% arrange(desc(cooksd)) %>% dplyr::slice_head(n =1)
+remove_idx <- as.numeric(rownames(outliers))
+
+df_noo <- df[-remove_idx,]
+test.glm <- glm(approved ~ . - self + self:(odir + white + uria), data = df_noo, family = binomial)
+summary(test.glm)
+```
+
+``` {r}
+df_copy <- df 
+
+# recode mcs
+df_copy$mcs <- df_copy$mcs - 1
+
+test.glm <- glm(approved ~ . + self:(odir + white + uria), data = df_copy, family = binomial)
+
+# Check if all coefficients are the same except for the intercept
+all.equal(summary(test.glm)$coefficients[-1, ], summary(numeric.glm)$coefficients[-1, ])
+```
+``` {r}
+summary(numeric.glm)$coefficients
+summary(test.glm)$coefficients
+
+xtable(summary(numeric.glm)$coefficients, digits=5)
+
+```
+``` {r}
+
+
+
+```
+

@@ -1,0 +1,47 @@
+```{r}
+df <- read.csv("data/mortg.csv")
+model <- glm(approved ~ . + self:(odir + white + uria), data = df, family = binomial)
+summary(model)
+```
+
+``` {r}
+logodds_res <- summary(model)$coefficients
+
+# Transform results from log-odds to odds
+lower_ci <- exp(logodds_res[,1] - 1.96 * logodds_res[,2])
+upper_ci <- exp(logodds_res[,1] + 1.96 * logodds_res[,2])
+odds_ratio_estimate <- exp(logodds_res[,1])
+
+# Create a data frame with the results
+results <- data.frame(odds_ratio_estimate, lower_ci, upper_ci)
+results
+xtable(results, digits=5)
+```
+
+``` {r}
+# alternative model with mcs from 0 up to 3
+df_alt <- df %>%
+  mutate(mcs = mcs - 1)
+
+# Demean and standardize all numeric variables except approved
+df_alt$hir <- scale(df_alt$hir)
+df_alt$odir <- scale(df_alt$odir)
+df_alt$lvr <- scale(df_alt$lvr)
+df_alt$uria <- scale(df_alt$uria)
+
+model_alt <- glm(approved ~ . + self:(odir + white + uria), data = df_alt, family = binomial)
+
+logodds_res_alt <- summary(model_alt)$coefficients
+
+xtable(logodds_res_alt)
+
+# transform results from log-odds to odds
+lower_ci_alt <- exp(logodds_res_alt[,1] - 1.96 * logodds_res_alt[,2])
+upper_ci_alt <- exp(logodds_res_alt[,1] + 1.96 * logodds_res_alt[,2])
+odds_ratio_estimate_alt <- exp(logodds_res_alt[,1])
+
+# create a data frame with the results
+results_alt <- data.frame(odds_ratio_estimate_alt, lower_ci_alt, upper_ci_alt)
+results_alt
+xtable(results_alt)
+```
