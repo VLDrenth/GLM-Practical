@@ -81,3 +81,21 @@ cat("Likelihood ratio test statistic:", lrt, "\n")
 cat("Degrees of freedom:", dof, "\n")
 cat("p-value:", pval, "\n")
 ```
+
+
+```{r}
+
+model <- numeric.glm
+
+n1 <- length(model$residuals)/2
+n2 <- n1 + 1
+N <- length(model$residuals)
+# plot residuals
+plot(predict(model,type="response")[1:n1], residuals(model, type='deviance')[1:n1],
+xlab=expression(hat(mu)), ylab="Deviance Residuals",
+pch=19, col="blue", xlim=c(min(predict(model, type="response")[1:n1]),1), ylim=c(-2.5,2.5))
+
+points(predict(model,type="response")[n2:N], residuals(model, type = 'deviance')[n2:N],pch=19, col="red")
+
+```
+

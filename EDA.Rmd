@@ -10,11 +10,46 @@ library(dplyr)
 df <- read.csv('data/mortg.csv')
 
 head(df)
+mean(df$approved)
 ```
+
+``` {r}
+
+hirdec <- findInterval(df$hir, quantile(df$hir, seq(0, 0.9, 0.1)))
+
+barplot(tapply(df$approved, hirdec, mean), beside = TRUE,
+        col = c('skyblue', 'steelblue'),
+        ylab = 'Prop. approve',
+        xlab = 'hir decile',
+        ylim = c(0,1))
+
+odirdec <- findInterval(df$odir, quantile(df$odir, seq(0, 0.9, 0.1)))
+
+barplot(tapply(df$approved, odirdec, mean), beside = TRUE,
+        col = c('skyblue', 'steelblue'),
+        ylab = 'Prop. approve',
+        xlab = 'odir decile',
+        ylim = c(0, 1))
+
+
+lvrdec <- findInterval(df$lvr, quantile(df$lvr, seq(0, 0.9, 0.1)))
+
+barplot(tapply(df$approved, lvrdec, mean), beside = TRUE,
+        col = c('skyblue', 'steelblue'),
+        ylab = 'Prop. approve',
+        xlab = 'lvr decile',
+        ylim = c(0, 1))
+
+```
+
 ```{r}
-# Plotting box plots of numerical variables against the binary approved
-# using facet wrap
+# Approval rate per binary variable in df
+tapply(df$approved, df$self, mean)
+tapply(df$approved, df$single, mean)
+tapply(df$approved, df$white, mean)
 ```
+
+
 
 ```{r}
 ggplot(df, aes(x = factor(ifelse(approved, 'Yes', 'No')), y = hir)) +
@@ -56,8 +91,82 @@ other_ratios <- df %>%
   group_by(self, single, white) %>%
   summarise(approved = sum(approved) / length(approved))
 other_ratios
+
+xtable(other_ratios)
+
+# get approval rate for self single and white aggregated
+approval_white <- tapply(df$approved, df$white, mean)
+approval_single <- tapply(df$approved, df$single, mean)
+approval_self <- tapply(df$approved, df$self, mean)
+
+approval_white
+approval_single
+approval_self
 ```
 
+```{r}
+```
+
+``` {r} 
+df_cont <- df %>% select(hir, odir, lvr)
+
+df_discrete <- df %>% select(self, single, white, approved)
+df_categorical <- df %>% select(uria, mcs)
+
+# For the continous variables, compute the min, mean, max, and standard deviation
+# Store in a 4 by 3 data frame using reframe
+mins <- apply(df_cont, 2, min)
+means <- apply(df_cont, 2, mean)
+maxs <- apply(df_cont, 2, max)
+sds <- apply(df_cont, 2, sd)
+kurts <- apply(df_cont, 2, PerformanceAnalytics::kurtosis)
+
+reframe_cont <- xtable(as.data.frame(
+  t(data.frame(mins, means, maxs, sds, kurts))))
+
+# get proportions for each binary variable in df_discrete
+df_discrete <- apply(df_discrete, 2, function(x) table(x) / length(x))
+reframe_discrete <- xtable(df_discrete)
+
+
+cat('discrete', '\n')
+reframe_discrete
+cat('continuous', '\n')
+reframe_cont
+```
+``` {r}
+
+counts_mcs <- df %>% group_by(mcs) %>% count() / nrow(df)
+counts_uria <- df %>% group_by(uria) %>% count() %>% mutate(n = n / nrow(df))
+
+ggplot(counts_mcs, aes(x = seq(1, 4, 1), y = n)) +
+  geom_bar(stat = "identity", fill = 'steelblue') +
+  labs(x = "Mcs", y = "Proportion of observations") +
+  theme_minimal()
+
+ggplot(counts_uria, aes(x = as.factor(round(uria, 2)), y = n)) +
+  geom_bar(stat = "identity", fill = 'steelblue') +
+  labs(x = "Uria", y = "Proportion of observations") +
+  theme_minimal()
+```
+
+``` {r}
+
+# Plot barplots of approval rate for each level of mcs
+barplot(tapply(df$approved, df$mcs, mean), beside = TRUE,
+        col = c('skyblue', 'steelblue'),
+        ylab = 'Prop. approve',
+        xlab = 'mcs',
+        ylim = c(0, 1))
+
+# Plot barplots of approval rate for each level of uria
+barplot(tapply(df$approved, df$uria, mean), beside = TRUE,
+        col = c('skyblue', 'steelblue'),
+        ylab = 'Prop. approve',
+        xlab = 'uria',
+        ylim = c(0, 1))
+
+```
 
 
 
